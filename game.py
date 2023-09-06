@@ -11,7 +11,7 @@ def clear():
 
 
 class Game:
-    SPEED_FRAME = 0.2
+    SPEED_FRAME = 0.01
 
     def __init__(self):
         self.players = []
@@ -65,17 +65,24 @@ class Game:
         self.show_next_frame()
         sleep(2)
 
-
+        General_turno = 0
         while True:
-            # input("Presiona enter para continuar")
+            General_turno += 1
+            print("#======================== Turno =======================#")
+            print(f"-------------------->  {General_turno}  <---------------------")
+            print("#======================================================#")
+           
             self.current_player = actual_player
             self.update_board()
             self.dice.roll()
+            dice = self.dice
+            print("dado: ",dice)
+            print("color jugador: ", actual_player.color)
             # self.dice.value = 6
             # piece = actual_player.next_piece_last()
             piece = actual_player.next_piece_first()
             # piece = actual_player.next_piece_random()
-
+            input("Presiona enter para continuar")
             if piece.first_move:
                 initial_pos_coord = Board.start_cells[self.current_player.color]
                 x_coord, y_coord = initial_pos_coord
@@ -117,6 +124,9 @@ class Game:
 
             if actual_player.has_won():
                 self.winner = actual_player
+                print("#======================== Turno =======================#")
+                print(f"-------------------->  {General_turno}  <---------------------")
+                print("#======================================================#")
                 print(f"El ganador es {self.winner.color}")
                 break
             actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]

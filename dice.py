@@ -1,11 +1,12 @@
-from numpy import random
+import random
 
 class Dice:
         def __init__(self):
             self.value = None
     
         def roll(self):
-            self.value = random.randint(1, 7)
+            self.value = random.randint(1, 6)
+            print(self.value)
             return self.value
     
         def __str__(self):
