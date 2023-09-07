@@ -9,7 +9,6 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
     
 
-
 class Game:
     SPEED_FRAME = 0.2
 
@@ -19,7 +18,6 @@ class Game:
         self.board = Board()
         self.current_player = None
         self.winner = None
-        # self.colors = ["red"] # ["red", "green", "yellow", "blue"]
         self.colors = ["red", "green", "yellow", "blue"]
         self.dice = Dice()
 
@@ -63,13 +61,11 @@ class Game:
 
     def start(self):
         order_players = self.get_order_player()
-        actual_player = order_players[0]
+        current_player = order_players[0]
         self.show_next_frame()
         sleep(2)
 
         while True:
-
-            self.current_player = actual_player
             self.dice.roll()
 
             piece = actual_player.next_piece_last(self.dice)
@@ -126,7 +122,7 @@ class Game:
 
                     self.show_next_frame()
 
-            pieces_same_position = self.check_pieces_same_position(actual_player, piece)
+            pieces_same_position = self.check_pieces_same_position(piece)
 
             if actual_player.has_won():
                 self.winner = actual_player
@@ -143,16 +139,12 @@ class Game:
 
                 if different_color_pieces:
                     for p in different_color_pieces:
-                        self.send_to_start(p)  # Solo enviamos la pieza que ya estaba en la casilla al inicio.
-
+                        self.send_to_start(p)
 
                 self.show_next_frame()
-            
-            
+        
+            self.current_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
 
-            actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
-
-            # print("Jugo el jugador", actual_player.color)
         print(f"El ganador es {self.winner.color}")
 
     def show_next_frame(self):
@@ -161,25 +153,13 @@ class Game:
         self.show_board()
         sleep(self.SPEED_FRAME)
 
-    def check_pieces_same_position(self, player, piece):
+    def check_pieces_same_position(self, piece):
         return [
             other_piece
             for p in self.players
             for other_piece in p.pieces
             if other_piece.get_coord() == piece.get_coord() and other_piece != piece
         ]
-
-    def try_to_king_piece(self, player, piece):
-        pieces_same_position = self.check_pieces_same_position(player, piece)
-
-        if pieces_same_position:
-            are_same_color = all(piece.color == piece_same_position.color for piece_same_position in pieces_same_position)
-            
-            if are_same_color:
-                player.kinged_pieces.append(pieces_same_position)
-                return True
-
-        return False
 
     def combine_king_groups(self, player, group1, group2):
         if group1 in player.kinged_pieces and group2 in player.kinged_pieces:
