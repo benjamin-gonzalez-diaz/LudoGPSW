@@ -1,6 +1,6 @@
 class Piece:
 
-    def __init__(self, x, y, color, emoji):
+    def __init__(self, x, y, color, emoji, identifier):
         self.x = x
         self.y = y
         self.color = color
@@ -12,6 +12,7 @@ class Piece:
         self.is_king = False
         self.rest_of_kinged_pieces = []
         self.is_in_board = False
+        self.identifier = identifier
 
         self.move_in_direction_to = {
             "up": self.move_up,
@@ -25,10 +26,10 @@ class Piece:
         }
     
     def __str__(self):
-        return f"({self.x}, {self.y}) {self.color}"
+        return f"id:{self.identifier} pos:({self.x}, {self.y}) c:{self.color}"
 
     def __repr__(self):
-        return f"({self.x}, {self.y}) {self.color}"
+        return f"id:{self.identifier} pos:({self.x}, {self.y}) c:{self.color}"
     
     def move_up(self):
         self.move_to(self.x, self.y - 1)
@@ -59,20 +60,23 @@ class Piece:
         self.y = y
         self.number_of_moves += 1
 
-        for piece in self.rest_of_kinged_pieces:
-            piece.x = x
-            piece.y = y
-            piece.number_of_moves += 1
-
     def get_coord(self):
         return (self.x, self.y)
     
     def king(self, pieces_below):
         self.is_king = True
-        self.rest_of_kinged_pieces = pieces_below
 
-        for piece in pieces_below:
-            if self not in piece.rest_of_kinged_pieces:
-                piece.rest_of_kinged_pieces.append(self)
+        # Combina las piezas que ya estaban coronadas con la pieza actual y las nuevas piezas_below
+        all_kinged_pieces = set(self.rest_of_kinged_pieces + [self] + pieces_below)
+
+        for piece in all_kinged_pieces:
+            piece.is_king = True  # Coronamos cada pieza en 'all_kinged_pieces'.
+            piece.rest_of_kinged_pieces = list(all_kinged_pieces - {piece})  # Asignamos todas las piezas, excepto ella misma.
+
+    def move_other_kigned_pieces(self):
+        for piece in self.rest_of_kinged_pieces:
+            piece.x = self.x
+            piece.y = self.y
+            piece.number_of_moves += 1
 
 

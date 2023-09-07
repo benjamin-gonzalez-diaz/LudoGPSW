@@ -2,7 +2,7 @@ from dice import Dice
 from board import Board
 from player import Player
 from time import sleep
-
+from logger import Logger
 import os
 
 def clear():
@@ -22,6 +22,9 @@ class Game:
         # self.colors = ["red"] # ["red", "green", "yellow", "blue"]
         self.colors = ["red", "green", "yellow", "blue"]
         self.dice = Dice()
+
+        self.logger = Logger("log.txt")
+        self.logger.clear()
         self.initilize_players()
 
     def initilize_players(self):
@@ -32,7 +35,6 @@ class Game:
             self.players_dict[color] = player
 
     def update_board(self):
-        # clear()
         tokens = []
         for player in self.players:
             for piece in player.pieces:
@@ -68,60 +70,68 @@ class Game:
         while True:
 
             self.current_player = actual_player
-            self.update_board()
             self.dice.roll()
-            # self.dice.value = 6
 
-            # piece = actual_player.next_piece_last(self.dice)
-            # piece = actual_player.next_piece_first(self.dice)
-            piece = actual_player.next_piece_random(self.dice)
+            piece = actual_player.next_piece_last(self.dice)
 
             if piece is None:
                 self.show_next_frame()
-                print(f"El jugador {actual_player.color} no tiene fichas disponibles para mover")
-                # input("Presiona enter para continuar")
                 actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
                 continue
 
-            if not piece.is_in_board:
+            if piece not in actual_player.pieces_in_board:
+                piece.is_in_board = True
                 actual_player.pieces_in_board.append(piece)
 
             if piece.first_move:
+                piece.first_move = False
+
                 initial_pos_coord = Board.start_cells[self.current_player.color]
                 x_coord, y_coord = initial_pos_coord
 
-                piece.move_to(x_coord, y_coord) # mover dice.value - 1
+                piece.move_to(x_coord, y_coord) 
                 
                 self.show_next_frame()
 
-                for i in range(self.dice.value - 1):
+                for _ in range(self.dice.value - 1):
                     next_move_direction_to = Board.normal_cells[piece.get_coord()]
                     piece.move_in_direction_to[next_move_direction_to]()
-
                     self.show_next_frame()
-                    
-                piece.first_move = False
                 
-
             else:
-                for i in range(self.dice.value):
+                piece.first_move = False
+                for _ in range(self.dice.value):
+
                     if piece.get_coord() in Board.special_cells[actual_player.color]:
                         next_move_direction_to = Board.special_cells[actual_player.color][piece.get_coord()]
+
                     elif piece.get_coord() in Board.normal_cells:
                         next_move_direction_to = Board.normal_cells[piece.get_coord()]
-                    else:
+
+                    elif piece.get_coord() == Board.end_cells[actual_player.color]:
                         piece.finished = True
+                        for p in piece.rest_of_kinged_pieces:
+                            p.finished = True
+                        self.logger.log(f"La pieza {piece} ha terminado y las piezas {piece.rest_of_kinged_pieces} también")
                         break
 
+                    elif piece.get_coord() in Board.initial_pieces[actual_player.color]["positions"]:
+                        raise Exception("La pieza está en la posición inicial, pero no es la primera jugada y no deberia estar en el tablero")
+                    
+                    else:
+                        raise Exception("La pieza no está en el tablero ni en la posición inicial")
+
                     piece.move_in_direction_to[next_move_direction_to]()
-                    if piece.get_coord() in Board.end_cells[actual_player.color]:
-                        piece.finished = True
-                        break
+                    piece.move_other_kigned_pieces()
 
                     self.show_next_frame()
 
             pieces_same_position = self.check_pieces_same_position(actual_player, piece)
 
+            if actual_player.has_won():
+                self.winner = actual_player
+                break
+            
             if pieces_same_position:
                 same_color_pieces = [p for p in pieces_same_position if p.color == piece.color]
                 different_color_pieces = [p for p in pieces_same_position if p.color != piece.color]
@@ -133,28 +143,23 @@ class Game:
 
                 if different_color_pieces:
                     for p in different_color_pieces:
-                        if p.is_king:  # Si una de las piezas en la casilla ya está coronada
-                            self.send_to_start([p] + p.rest_of_kinged_pieces)
-                        else:
-                            self.send_to_start([p])  # Solo enviamos la pieza que ya estaba en la casilla al inicio.
+                        self.send_to_start(p)  # Solo enviamos la pieza que ya estaba en la casilla al inicio.
 
 
                 self.show_next_frame()
+            
+            
 
-            if actual_player.has_won():
-                self.winner = actual_player
-                print(f"El ganador es {self.winner.color}")
-                break
             actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
 
-            print("Jugo el jugador", actual_player.color)
-            # input("Presiona enter para continuar")
+            # print("Jugo el jugador", actual_player.color)
+        print(f"El ganador es {self.winner.color}")
+
     def show_next_frame(self):
         clear()
         self.update_board()
         self.show_board()
         sleep(self.SPEED_FRAME)
-        # clear()
 
     def check_pieces_same_position(self, player, piece):
         return [
@@ -164,7 +169,6 @@ class Game:
             if other_piece.get_coord() == piece.get_coord() and other_piece != piece
         ]
 
-    
     def try_to_king_piece(self, player, piece):
         pieces_same_position = self.check_pieces_same_position(player, piece)
 
@@ -172,13 +176,11 @@ class Game:
             are_same_color = all(piece.color == piece_same_position.color for piece_same_position in pieces_same_position)
             
             if are_same_color:
-                # Aquí, en lugar de simplemente añadir piezas, añadimos la lista completa de piezas en la misma posición
                 player.kinged_pieces.append(pieces_same_position)
                 return True
 
         return False
 
-    # Función para combinar grupos coronados
     def combine_king_groups(self, player, group1, group2):
         if group1 in player.kinged_pieces and group2 in player.kinged_pieces:
             combined_group = group1 + group2
@@ -186,21 +188,17 @@ class Game:
             player.kinged_pieces.remove(group2)
             player.kinged_pieces.append(combined_group)
         
-        
-    
-    def send_to_start(self, pieces):
-        for piece in pieces:
-            piece.move_to(*piece.initial_pos)
-            self.show_next_frame()
-            piece.first_move = True
-            piece.number_of_moves = 0
-            piece.is_king = False  # Descorona la pieza
-            piece.rest_of_kinged_pieces = []  # Limpia la lista de piezas coronadas asociadas
-            piece.is_in_board = False
+    def send_to_start(self, piece):
+        self.logger.log(f"La pieza {piece} fue enviada al inicio")
+        piece.move_to(*piece.initial_pos)
+        piece.first_move = True
+        piece.number_of_moves = 0
+        piece.is_king = False
+        piece.rest_of_kinged_pieces = []
+        piece.is_in_board = False
 
-            player_of_piece = self.get_player_by_color(piece.color)
-            player_of_piece.pieces_in_board.remove(piece)
-
+        player_of_piece = self.get_player_by_color(piece.color)
+        player_of_piece.pieces_in_board.remove(piece)
 
     def get_player_by_color(self, color):
         return self.players_dict[color]

@@ -11,8 +11,12 @@ class Player:
         self.pieces_in_board = []
   
     def initialize_pieces(self, initial_pieces):
-        for piece in initial_pieces[self.color]["positions"]:
-            self.pieces.append(Piece(piece[0], piece[1], self.color, initial_pieces[self.color]["emoji"]))
+        pieces_data = initial_pieces[self.color]
+        self.pieces = [
+            Piece(x, y, self.color, pieces_data["emoji"], idx + 1) 
+            for idx, (x, y) in enumerate(pieces_data["positions"])
+        ]
+
 
     def has_won(self):
         for piece in self.pieces:
