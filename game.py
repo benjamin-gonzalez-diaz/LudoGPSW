@@ -66,26 +66,25 @@ class Game:
         sleep(2)
 
         while True:
-            # input("Presiona enter para continuar")
+
             self.current_player = actual_player
             self.update_board()
             self.dice.roll()
             # self.dice.value = 6
-            # piece = actual_player.next_piece_last()
-            # piece = actual_player.next_piece_first()
 
-            if self.dice.value in Dice.special_numbers:
-                piece = actual_player.next_piece_first(only_in_board=False)
-            else:
-                piece = actual_player.next_piece_first(only_in_board=True)
+            # piece = actual_player.next_piece_last(self.dice)
+            # piece = actual_player.next_piece_first(self.dice)
+            piece = actual_player.next_piece_random(self.dice)
 
             if piece is None:
+                self.show_next_frame()
                 print(f"El jugador {actual_player.color} no tiene fichas disponibles para mover")
-                input("Presiona enter para continuar")
+                # input("Presiona enter para continuar")
                 actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
                 continue
 
-            actual_player.pieces_in_board.append(piece)
+            if not piece.is_in_board:
+                actual_player.pieces_in_board.append(piece)
 
             if piece.first_move:
                 initial_pos_coord = Board.start_cells[self.current_player.color]
@@ -122,8 +121,24 @@ class Game:
                     self.show_next_frame()
 
             pieces_same_position = self.check_pieces_same_position(actual_player, piece)
+
             if pieces_same_position:
-                self.send_to_start(pieces_same_position)
+                same_color_pieces = [p for p in pieces_same_position if p.color == piece.color]
+                different_color_pieces = [p for p in pieces_same_position if p.color != piece.color]
+
+                if same_color_pieces:
+                    piece.king(same_color_pieces)
+                    for p in same_color_pieces:
+                        p.king([piece] + [x for x in same_color_pieces if x != p])
+
+                if different_color_pieces:
+                    for p in different_color_pieces:
+                        if p.is_king:  # Si una de las piezas en la casilla ya está coronada
+                            self.send_to_start([p] + p.rest_of_kinged_pieces)
+                        else:
+                            self.send_to_start([p])  # Solo enviamos la pieza que ya estaba en la casilla al inicio.
+
+
                 self.show_next_frame()
 
             if actual_player.has_won():
@@ -132,7 +147,8 @@ class Game:
                 break
             actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
 
-            
+            print("Jugo el jugador", actual_player.color)
+            # input("Presiona enter para continuar")
     def show_next_frame(self):
         clear()
         self.update_board()
@@ -143,10 +159,34 @@ class Game:
     def check_pieces_same_position(self, player, piece):
         return [
             other_piece
-            for p in (p for p in self.players if p != player)
+            for p in self.players
             for other_piece in p.pieces
-            if other_piece.get_coord() == piece.get_coord()
+            if other_piece.get_coord() == piece.get_coord() and other_piece != piece
         ]
+
+    
+    def try_to_king_piece(self, player, piece):
+        pieces_same_position = self.check_pieces_same_position(player, piece)
+
+        if pieces_same_position:
+            are_same_color = all(piece.color == piece_same_position.color for piece_same_position in pieces_same_position)
+            
+            if are_same_color:
+                # Aquí, en lugar de simplemente añadir piezas, añadimos la lista completa de piezas en la misma posición
+                player.kinged_pieces.append(pieces_same_position)
+                return True
+
+        return False
+
+    # Función para combinar grupos coronados
+    def combine_king_groups(self, player, group1, group2):
+        if group1 in player.kinged_pieces and group2 in player.kinged_pieces:
+            combined_group = group1 + group2
+            player.kinged_pieces.remove(group1)
+            player.kinged_pieces.remove(group2)
+            player.kinged_pieces.append(combined_group)
+        
+        
     
     def send_to_start(self, pieces):
         for piece in pieces:
@@ -154,12 +194,18 @@ class Game:
             self.show_next_frame()
             piece.first_move = True
             piece.number_of_moves = 0
+            piece.is_king = False  # Descorona la pieza
+            piece.rest_of_kinged_pieces = []  # Limpia la lista de piezas coronadas asociadas
+            piece.is_in_board = False
 
             player_of_piece = self.get_player_by_color(piece.color)
             player_of_piece.pieces_in_board.remove(piece)
 
+
     def get_player_by_color(self, color):
         return self.players_dict[color]
+
+
 
 
 

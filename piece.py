@@ -9,6 +9,9 @@ class Piece:
         self.finished = False
         self.number_of_moves = 0
         self.initial_pos = (x, y)
+        self.is_king = False
+        self.rest_of_kinged_pieces = []
+        self.is_in_board = False
 
         self.move_in_direction_to = {
             "up": self.move_up,
@@ -56,6 +59,20 @@ class Piece:
         self.y = y
         self.number_of_moves += 1
 
+        for piece in self.rest_of_kinged_pieces:
+            piece.x = x
+            piece.y = y
+            piece.number_of_moves += 1
+
     def get_coord(self):
         return (self.x, self.y)
     
+    def king(self, pieces_below):
+        self.is_king = True
+        self.rest_of_kinged_pieces = pieces_below
+
+        for piece in pieces_below:
+            if self not in piece.rest_of_kinged_pieces:
+                piece.rest_of_kinged_pieces.append(self)
+
+

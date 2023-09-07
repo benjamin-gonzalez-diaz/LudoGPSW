@@ -1,6 +1,7 @@
 from piece import Piece
 from random import choice
 
+
 class Player:
 
     def __init__(self, color):
@@ -19,23 +20,26 @@ class Player:
                 return False
         return True
     
-    def next_piece_last(self, only_in_board=False):
+    def next_piece_last(self, dice):
+        only_in_board = True if not dice.value in [1, 6] else False
         unfinished_pieces = self.get_not_finished_pieces(only_in_board)
 
         if not unfinished_pieces:
             return None
         return min(unfinished_pieces, key=lambda piece: piece.number_of_moves)
     
-    def next_piece_first(self, only_in_board=False):
+    def next_piece_first(self, dice):
+        only_in_board = True if not dice.value in [1, 6] else False
         unfinished_pieces = self.get_not_finished_pieces(only_in_board)
 
         if not unfinished_pieces:
             return None
         return max(unfinished_pieces, key=lambda piece: piece.number_of_moves)
     
-    def next_piece_random(self, only_in_board=False):
+    def next_piece_random(self, dice):
+        only_in_board = True if not dice.value in [1, 6] else False
         unfinished_pieces = self.get_not_finished_pieces(only_in_board)
-        
+
         if not unfinished_pieces:
             return None
         return choice(unfinished_pieces)
