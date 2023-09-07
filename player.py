@@ -4,11 +4,21 @@ from random import choice
 
 class Player:
 
-    def __init__(self, color):
+    def __init__(self, color, type_of_player="last"):
         self.color = color
         self.pieces = []
         self.kinged_pieces = []
         self.pieces_in_board = []
+
+        self.type_of_play = {
+            "last": self.next_piece_last,
+            "first": self.next_piece_first,
+            "random": self.next_piece_random,
+        }
+
+        if type_of_player not in self.type_of_play.keys():
+            print(f"Warning: '{type_of_player}' is not a valid type of play. Using 'last'.")
+            type_of_player = "last"
   
     def initialize_pieces(self, initial_pieces):
         pieces_data = initial_pieces[self.color]
@@ -17,12 +27,14 @@ class Player:
             for idx, (x, y) in enumerate(pieces_data["positions"])
         ]
 
-
     def has_won(self):
         for piece in self.pieces:
             if not piece.finished:
                 return False
         return True
+    
+    def next_piece(self, dice):
+        return self.type_of_play[self.type_of_player](dice)
     
     def next_piece_last(self, dice):
         only_in_board = True if not dice.value in [1, 6] else False

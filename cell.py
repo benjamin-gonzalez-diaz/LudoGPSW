@@ -1,5 +1,5 @@
 normal_cells = {
-    (1,6): "right", #red
+    (1,6): "right",
     (2,6): "right",
     (3,6): "right",
     (4,6): "right",

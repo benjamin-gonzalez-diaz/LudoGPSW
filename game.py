@@ -12,22 +12,22 @@ def clear():
 class Game:
     SPEED_FRAME = 0.2
 
-    def __init__(self):
+    def __init__(self, type_of_play="last"):
         self.players = []
         self.players_dict = {}
-        self.board = Board()
-        self.current_player = None
-        self.winner = None
-        self.colors = ["red", "green", "yellow", "blue"]
+
         self.dice = Dice()
+        self.board = Board()
 
         self.logger = Logger("log.txt")
         self.logger.clear()
-        self.initilize_players()
 
-    def initilize_players(self):
-        for color in self.colors:
-            player = Player(color)
+        self.initilize_players(type_of_play)
+
+    def initilize_players(self, type_of_play):
+        colors = ["red", "green", "yellow", "blue"]
+        for color in colors:
+            player = Player(color, type_of_play)
             player.initialize_pieces(Board.initial_pieces)
             self.players.append(player)
             self.players_dict[color] = player
@@ -68,21 +68,21 @@ class Game:
         while True:
             self.dice.roll()
 
-            piece = actual_player.next_piece_last(self.dice)
+            piece = current_player.next_piece_last(self.dice)
 
             if piece is None:
                 self.show_next_frame()
-                actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
+                current_player = order_players[(order_players.index(current_player) + 1) % len(order_players)]
                 continue
 
-            if piece not in actual_player.pieces_in_board:
+            if piece not in current_player.pieces_in_board:
                 piece.is_in_board = True
-                actual_player.pieces_in_board.append(piece)
+                current_player.pieces_in_board.append(piece)
 
             if piece.first_move:
                 piece.first_move = False
 
-                initial_pos_coord = Board.start_cells[self.current_player.color]
+                initial_pos_coord = Board.start_cells[current_player.color]
                 x_coord, y_coord = initial_pos_coord
 
                 piece.move_to(x_coord, y_coord) 
@@ -98,24 +98,24 @@ class Game:
                 piece.first_move = False
                 for _ in range(self.dice.value):
 
-                    if piece.get_coord() in Board.special_cells[actual_player.color]:
-                        next_move_direction_to = Board.special_cells[actual_player.color][piece.get_coord()]
+                    if piece.get_coord() in Board.special_cells[current_player.color]:
+                        next_move_direction_to = Board.special_cells[current_player.color][piece.get_coord()]
 
                     elif piece.get_coord() in Board.normal_cells:
                         next_move_direction_to = Board.normal_cells[piece.get_coord()]
 
-                    elif piece.get_coord() == Board.end_cells[actual_player.color]:
+                    elif piece.get_coord() == Board.end_cells[current_player.color]:
                         piece.finished = True
                         for p in piece.rest_of_kinged_pieces:
                             p.finished = True
-                        self.logger.log(f"La pieza {piece} ha terminado y las piezas {piece.rest_of_kinged_pieces} también")
+                        self.logger.log(f"La pieza {piece} ha terminado y las piezas {piece.rest_of_kinged_pieces} tambien")
                         break
 
-                    elif piece.get_coord() in Board.initial_pieces[actual_player.color]["positions"]:
-                        raise Exception("La pieza está en la posición inicial, pero no es la primera jugada y no deberia estar en el tablero")
+                    elif piece.get_coord() in Board.initial_pieces[current_player.color]["positions"]:
+                        raise Exception("La pieza esta en la posición inicial, pero no es la primera jugada y no deberia estar en el tablero")
                     
                     else:
-                        raise Exception("La pieza no está en el tablero ni en la posición inicial")
+                        raise Exception("La pieza no esta en el tablero ni en la posición inicial")
 
                     piece.move_in_direction_to[next_move_direction_to]()
                     piece.move_other_kigned_pieces()
@@ -124,10 +124,6 @@ class Game:
 
             pieces_same_position = self.check_pieces_same_position(piece)
 
-            if actual_player.has_won():
-                self.winner = actual_player
-                break
-            
             if pieces_same_position:
                 same_color_pieces = [p for p in pieces_same_position if p.color == piece.color]
                 different_color_pieces = [p for p in pieces_same_position if p.color != piece.color]
@@ -143,10 +139,13 @@ class Game:
 
                 self.show_next_frame()
         
-            self.current_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
+            if current_player.has_won():
+                print(f"El ganador es {self.winner.color}")
+                break
 
-        print(f"El ganador es {self.winner.color}")
+            current_player = order_players[(order_players.index(current_player) + 1) % len(order_players)]
 
+        
     def show_next_frame(self):
         clear()
         self.update_board()
@@ -182,12 +181,3 @@ class Game:
 
     def get_player_by_color(self, color):
         return self.players_dict[color]
-
-
-
-
-
-if __name__ == "__main__":
-    game = Game()
-    game.start()
-

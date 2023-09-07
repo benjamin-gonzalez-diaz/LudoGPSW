@@ -66,12 +66,11 @@ class Piece:
     def king(self, pieces_below):
         self.is_king = True
 
-        # Combina las piezas que ya estaban coronadas con la pieza actual y las nuevas piezas_below
         all_kinged_pieces = set(self.rest_of_kinged_pieces + [self] + pieces_below)
 
         for piece in all_kinged_pieces:
-            piece.is_king = True  # Coronamos cada pieza en 'all_kinged_pieces'.
-            piece.rest_of_kinged_pieces = list(all_kinged_pieces - {piece})  # Asignamos todas las piezas, excepto ella misma.
+            piece.is_king = True
+            piece.rest_of_kinged_pieces = list(all_kinged_pieces - {piece})
 
     def move_other_kigned_pieces(self):
         for piece in self.rest_of_kinged_pieces:

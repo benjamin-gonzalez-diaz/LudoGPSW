@@ -24,4 +24,3 @@ class Board:
             color = token[2]
             self.board = self.replace_at_index(self.board, 16 * y + x + 1, color)
         return self.board
-

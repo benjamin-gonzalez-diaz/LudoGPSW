@@ -36,4 +36,3 @@ initial_pieces = {
         "emoji": "🟡"
     },
 }
-
