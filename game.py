@@ -65,7 +65,6 @@ class Game:
         self.show_next_frame()
         sleep(2)
 
-
         while True:
             # input("Presiona enter para continuar")
             self.current_player = actual_player
@@ -73,8 +72,20 @@ class Game:
             self.dice.roll()
             # self.dice.value = 6
             # piece = actual_player.next_piece_last()
-            piece = actual_player.next_piece_first()
-            # piece = actual_player.next_piece_random()
+            # piece = actual_player.next_piece_first()
+
+            if self.dice.value in Dice.special_numbers:
+                piece = actual_player.next_piece_first(only_in_board=False)
+            else:
+                piece = actual_player.next_piece_first(only_in_board=True)
+
+            if piece is None:
+                print(f"El jugador {actual_player.color} no tiene fichas disponibles para mover")
+                input("Presiona enter para continuar")
+                actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
+                continue
+
+            actual_player.pieces_in_board.append(piece)
 
             if piece.first_move:
                 initial_pos_coord = Board.start_cells[self.current_player.color]
@@ -120,7 +131,6 @@ class Game:
                 print(f"El ganador es {self.winner.color}")
                 break
             actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
-            # input("Presiona enter para continuar")
 
             
     def show_next_frame(self):
@@ -145,7 +155,15 @@ class Game:
             piece.first_move = True
             piece.number_of_moves = 0
 
+            player_of_piece = self.get_player_by_color(piece.color)
+            player_of_piece.pieces_in_board.remove(piece)
+
+    def get_player_by_color(self, color):
+        return self.players_dict[color]
 
 
 
+if __name__ == "__main__":
+    game = Game()
+    game.start()
 

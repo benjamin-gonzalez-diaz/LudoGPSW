@@ -7,6 +7,7 @@ class Player:
         self.color = color
         self.pieces = []
         self.kinged_pieces = []
+        self.pieces_in_board = []
   
     def initialize_pieces(self, initial_pieces):
         for piece in initial_pieces[self.color]["positions"]:
@@ -18,20 +19,23 @@ class Player:
                 return False
         return True
     
-    def next_piece_last(self):
-        unfinished_pieces = [piece for piece in self.pieces if not piece.finished]
+    def next_piece_last(self, only_in_board=False):
+        unfinished_pieces = self.get_not_finished_pieces(only_in_board)
+
         if not unfinished_pieces:
             return None
         return min(unfinished_pieces, key=lambda piece: piece.number_of_moves)
     
-    def next_piece_first(self):
-        unfinished_pieces = [piece for piece in self.pieces if not piece.finished]
+    def next_piece_first(self, only_in_board=False):
+        unfinished_pieces = self.get_not_finished_pieces(only_in_board)
+
         if not unfinished_pieces:
             return None
         return max(unfinished_pieces, key=lambda piece: piece.number_of_moves)
     
-    def next_piece_random(self):
-        unfinished_pieces = [piece for piece in self.pieces if not piece.finished]
+    def next_piece_random(self, only_in_board=False):
+        unfinished_pieces = self.get_not_finished_pieces(only_in_board)
+        
         if not unfinished_pieces:
             return None
         return choice(unfinished_pieces)
@@ -41,3 +45,11 @@ class Player:
     
     def __repr__(self):
         return self.color
+    
+    def get_not_finished_pieces(self, use_only_in_board=False):
+        if use_only_in_board:
+            unfinished_pieces = [piece for piece in self.pieces_in_board if not piece.finished]
+        else:
+            unfinished_pieces = [piece for piece in self.pieces if not piece.finished]
+
+        return unfinished_pieces
