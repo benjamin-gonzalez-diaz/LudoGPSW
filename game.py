@@ -11,9 +11,10 @@ def clear():
     
 
 class Game:
-    SPEED_FRAME = 0.2
+    SPEED_FRAME = 0.09
 
-    def __init__(self, type_of_play="last"):
+    def __init__(self, number_of_player=4, type_of_play="last"):
+        self.number_of_player = number_of_player
         self.players = []
         self.players_dict = {}
 
@@ -27,7 +28,7 @@ class Game:
 
     def initilize_players(self, type_of_play):
         colors = ["red", "green", "yellow", "blue"]
-        for color in colors:
+        for color in colors[:self.number_of_player]:
             player = Player(color, type_of_play)
             player.initialize_pieces(Board.initial_pieces)
             self.players.append(player)
@@ -130,10 +131,10 @@ class Game:
 
                 if same_color_pieces:
                     piece.king(same_color_pieces)
-                    # piece.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
+                    piece.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
                     for p in same_color_pieces:
                         p.king([piece] + [x for x in same_color_pieces if x != p])
-                        # p.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
+                        p.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
 
                 if different_color_pieces:
                     for p in different_color_pieces:
@@ -182,7 +183,7 @@ class Game:
         player_of_piece = self.get_player_by_color(piece.color)
         player_of_piece.pieces_in_board.remove(piece)
 
-        # piece.update_emoji(player_of_piece.emojis[1])
+        piece.update_emoji(player_of_piece.emojis[1])
 
     def get_player_by_color(self, color):
         return self.players_dict[color]
