@@ -5,24 +5,35 @@ from time import sleep
 
 import os
 
+
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
-    
 
 
 class Game:
     SPEED_FRAME = 0.01
 
-    def __init__(self):
+    def __init__(self, number_players: int):
         self.players = []
         self.players_dict = {}
         self.board = Board()
         self.current_player = None
         self.winner = None
         # self.colors = ["red"] # ["red", "green", "yellow", "blue"]
-        self.colors = ["red", "green", "yellow", "blue"]
+        self.colors = self.__get_player_colors(number_players)
         self.dice = Dice()
         self.initilize_players()
+
+    def __get_player_colors(self, number_players) -> list[str]:
+        colors = ["red", "green", "yellow", "blue"]
+        try:
+            number_players = int(number_players)
+            if not (2 <= number_players <= 4):
+                raise ValueError(
+                    "Valor incorrecto, ingrese un numero entre 2 y 4")
+            return colors[:number_players]
+        except ValueError:
+            raise ValueError("Valor incorrecto, ingrese un numero entre 2 y 4")
 
     def initilize_players(self):
         for color in self.colors:
@@ -44,17 +55,18 @@ class Game:
         print(self.board.board)
 
     def get_order_player(self):
-        rolls = list(map(lambda player: (player, self.dice.roll()), self.players))
-        
+        rolls = list(
+            map(lambda player: (player, self.dice.roll()), self.players))
+
         while True:
             rolls.sort(key=lambda x: x[1], reverse=True)
-            
+
             highest_roll = rolls[0][1]
             tied_players = [roll for roll in rolls if roll[1] == highest_roll]
-            
+
             if len(tied_players) == 1:
                 return [roll[0] for roll in rolls]
-            
+
             for index, (player, roll) in enumerate(rolls):
                 if roll == highest_roll:
                     rolls[index] = (player, self.dice.roll())
@@ -69,14 +81,15 @@ class Game:
         while True:
             General_turno += 1
             print("#======================== Turno =======================#")
-            print(f"-------------------->  {General_turno}  <---------------------")
+            print(
+                f"-------------------->  {General_turno}  <---------------------")
             print("#======================================================#")
-           
+
             self.current_player = actual_player
             self.update_board()
             self.dice.roll()
             dice = self.dice
-            print("dado: ",dice)
+            print("dado: ", dice)
             print("color jugador: ", actual_player.color)
             # self.dice.value = 6
             # piece = actual_player.next_piece_last()
@@ -87,25 +100,27 @@ class Game:
                 initial_pos_coord = Board.start_cells[self.current_player.color]
                 x_coord, y_coord = initial_pos_coord
 
-                piece.move_to(x_coord, y_coord) # mover dice.value - 1
-                
+                piece.move_to(x_coord, y_coord)  # mover dice.value - 1
+
                 self.show_next_frame()
 
                 for i in range(self.dice.value - 1):
-                    next_move_direction_to = Board.normal_cells[piece.get_coord()]
+                    next_move_direction_to = Board.normal_cells[piece.get_coord(
+                    )]
                     piece.move_in_direction_to[next_move_direction_to]()
 
                     self.show_next_frame()
-                    
+
                 piece.first_move = False
-                
 
             else:
                 for i in range(self.dice.value):
                     if piece.get_coord() in Board.special_cells[actual_player.color]:
-                        next_move_direction_to = Board.special_cells[actual_player.color][piece.get_coord()]
+                        next_move_direction_to = Board.special_cells[actual_player.color][piece.get_coord(
+                        )]
                     elif piece.get_coord() in Board.normal_cells:
-                        next_move_direction_to = Board.normal_cells[piece.get_coord()]
+                        next_move_direction_to = Board.normal_cells[piece.get_coord(
+                        )]
                     else:
                         piece.finished = True
                         break
@@ -117,7 +132,8 @@ class Game:
 
                     self.show_next_frame()
 
-            pieces_same_position = self.check_pieces_same_position(actual_player, piece)
+            pieces_same_position = self.check_pieces_same_position(
+                actual_player, piece)
             if pieces_same_position:
                 self.send_to_start(pieces_same_position)
                 self.show_next_frame()
@@ -125,14 +141,15 @@ class Game:
             if actual_player.has_won():
                 self.winner = actual_player
                 print("#======================== Turno =======================#")
-                print(f"-------------------->  {General_turno}  <---------------------")
+                print(
+                    f"-------------------->  {General_turno}  <---------------------")
                 print("#======================================================#")
                 print(f"El ganador es {self.winner.color}")
                 break
-            actual_player = order_players[(order_players.index(actual_player) + 1) % len(order_players)]
+            actual_player = order_players[(order_players.index(
+                actual_player) + 1) % len(order_players)]
             # input("Presiona enter para continuar")
 
-            
     def show_next_frame(self):
         clear()
         self.update_board()
@@ -147,15 +164,10 @@ class Game:
             for other_piece in p.pieces
             if other_piece.get_coord() == piece.get_coord()
         ]
-    
+
     def send_to_start(self, pieces):
         for piece in pieces:
             piece.move_to(*piece.initial_pos)
             self.show_next_frame()
             piece.first_move = True
             piece.number_of_moves = 0
-
-
-
-
-
