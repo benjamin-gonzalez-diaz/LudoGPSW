@@ -140,7 +140,7 @@ class Game:
                 self.show_next_frame()
         
             if current_player.has_won():
-                print(f"El ganador es {self.winner.color}")
+                print(f"El ganador es {current_player}")
                 break
 
             current_player = order_players[(order_players.index(current_player) + 1) % len(order_players)]
