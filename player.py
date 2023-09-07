@@ -1,30 +1,32 @@
 from piece import Piece
 from random import choice
-
+from emoji import emoji
 
 class Player:
 
-    def __init__(self, color, type_of_player="last"):
+    def __init__(self, color, type_of_play="last"):
         self.color = color
         self.pieces = []
         self.kinged_pieces = []
         self.pieces_in_board = []
+        self.emojis = emoji[self.color]
+        self.type_of_play = type_of_play
 
-        self.type_of_play = {
+        self.type_of_plays = {
             "last": self.next_piece_last,
             "first": self.next_piece_first,
             "random": self.next_piece_random,
         }
 
-        if type_of_player not in self.type_of_play.keys():
-            print(f"Warning: '{type_of_player}' is not a valid type of play. Using 'last'.")
-            type_of_player = "last"
+        if self.type_of_play not in self.type_of_plays.keys():
+            print(f"Warning: '{type_of_play}' is not a valid type of play. Using 'last'.")
+            self.type_of_play = "last"
   
     def initialize_pieces(self, initial_pieces):
         pieces_data = initial_pieces[self.color]
         self.pieces = [
-            Piece(x, y, self.color, pieces_data["emoji"], idx + 1) 
-            for idx, (x, y) in enumerate(pieces_data["positions"])
+            Piece(x, y, self.color, self.emojis[1], idx + 1) 
+            for idx, (x, y) in enumerate(pieces_data)
         ]
 
     def has_won(self):
@@ -34,7 +36,7 @@ class Player:
         return True
     
     def next_piece(self, dice):
-        return self.type_of_play[self.type_of_player](dice)
+        return self.type_of_plays[self.type_of_play](dice)
     
     def next_piece_last(self, dice):
         only_in_board = True if not dice.value in [1, 6] else False

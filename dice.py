@@ -1,8 +1,7 @@
 from numpy import random
 
 class Dice:
-    special_numbers = [1, 6]
-    
+
     def __init__(self):
         self.value = None
 
@@ -12,3 +11,6 @@ class Dice:
 
     def __str__(self):
         return f"🎲 {self.value}"
+    
+    def can_repeat(self):
+        return self.value in [1, 6]

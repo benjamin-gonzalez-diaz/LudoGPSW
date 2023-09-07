@@ -3,6 +3,7 @@ from board import Board
 from player import Player
 from time import sleep
 from logger import Logger
+from emoji import emoji
 import os
 
 def clear():
@@ -67,8 +68,7 @@ class Game:
 
         while True:
             self.dice.roll()
-
-            piece = current_player.next_piece_last(self.dice)
+            piece = current_player.next_piece(self.dice)
 
             if piece is None:
                 self.show_next_frame()
@@ -130,8 +130,10 @@ class Game:
 
                 if same_color_pieces:
                     piece.king(same_color_pieces)
+                    # piece.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
                     for p in same_color_pieces:
                         p.king([piece] + [x for x in same_color_pieces if x != p])
+                        # p.update_emoji(current_player.emojis[len(same_color_pieces) + 1 ])
 
                 if different_color_pieces:
                     for p in different_color_pieces:
@@ -143,7 +145,8 @@ class Game:
                 print(f"El ganador es {current_player}")
                 break
 
-            current_player = order_players[(order_players.index(current_player) + 1) % len(order_players)]
+            if not self.dice.can_repeat():
+                current_player = order_players[(order_players.index(current_player) + 1) % len(order_players)]
 
         
     def show_next_frame(self):
@@ -178,6 +181,8 @@ class Game:
 
         player_of_piece = self.get_player_by_color(piece.color)
         player_of_piece.pieces_in_board.remove(piece)
+
+        # piece.update_emoji(player_of_piece.emojis[1])
 
     def get_player_by_color(self, color):
         return self.players_dict[color]

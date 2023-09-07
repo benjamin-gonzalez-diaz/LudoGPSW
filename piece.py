@@ -78,4 +78,6 @@ class Piece:
             piece.y = self.y
             piece.number_of_moves += 1
 
+    def update_emoji(self, new_emoji):
+        self.emoji = new_emoji
 
