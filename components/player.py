@@ -1,6 +1,6 @@
-from piece import Piece
+from components.piece import Piece
 from random import choice
-from emoji import emoji
+from setup.emoji import emoji
 
 class Player:
 

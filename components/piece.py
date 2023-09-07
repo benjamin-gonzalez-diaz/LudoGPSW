@@ -1,3 +1,8 @@
+import pygame.mixer
+
+pygame.mixer.init()
+
+
 class Piece:
 
     def __init__(self, x, y, color, emoji, identifier):
@@ -56,6 +61,8 @@ class Piece:
         self.move_to(self.x + 1, self.y + 1)
 
     def move_to(self, x, y):
+        pygame.mixer.music.load(f"sounds/{self.color}.mp3")
+        pygame.mixer.music.play()
         self.x = x
         self.y = y
         self.number_of_moves += 1

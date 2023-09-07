@@ -1,6 +1,5 @@
-from game import Game
-
-
+from components.game import Game
+from util.clear_console import clear
 
 def ask_number_of_players():
     try:
@@ -15,9 +14,11 @@ def ask_number_of_players():
 if __name__ == "__main__":
     # Techine for the game, which piece to move next
     type_of_plays = ["last", "first", "random"]
-    type_of_play = type_of_plays[1]
+    type_of_play = type_of_plays[0]
 
+    clear()
     number_of_players = ask_number_of_players()
+    speed_frame = 0.25
 
-    game = Game(number_of_players, type_of_play)
+    game = Game(number_of_players, type_of_play, speed_frame)
     game.start()

@@ -1,19 +1,19 @@
-from dice import Dice
-from board import Board
-from player import Player
-from time import sleep
-from logger import Logger
-from emoji import emoji
-import os
+from components.dice import Dice
+from components.board import Board
+from components.player import Player
 
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
-    
+from util.clear_console import clear
+from util.logger import Logger
+
+from time import sleep
+
+import pygame.mixer
+
+pygame.mixer.init()
 
 class Game:
-    SPEED_FRAME = 0.09
 
-    def __init__(self, number_of_player=4, type_of_play="last"):
+    def __init__(self, number_of_player=4, type_of_play="last", speed_frame=0.25):
         self.number_of_player = number_of_player
         self.players = []
         self.players_dict = {}
@@ -23,6 +23,8 @@ class Game:
 
         self.logger = Logger("log.txt")
         self.logger.clear()
+
+        self.speed_frame = speed_frame
 
         self.initilize_players(type_of_play)
 
@@ -120,7 +122,6 @@ class Game:
 
                     piece.move_in_direction_to[next_move_direction_to]()
                     piece.move_other_kigned_pieces()
-
                     self.show_next_frame()
 
             pieces_same_position = self.check_pieces_same_position(piece)
@@ -143,7 +144,10 @@ class Game:
                 self.show_next_frame()
         
             if current_player.has_won():
+                pygame.mixer.music.load(f"sounds/win.mp3")
+                pygame.mixer.music.play()
                 print(f"El ganador es {current_player}")
+                sleep(4)
                 break
 
             if not self.dice.can_repeat():
@@ -154,7 +158,7 @@ class Game:
         clear()
         self.update_board()
         self.show_board()
-        sleep(self.SPEED_FRAME)
+        sleep(self.speed_frame)
 
     def check_pieces_same_position(self, piece):
         return [

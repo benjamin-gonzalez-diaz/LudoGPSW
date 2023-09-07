@@ -1,6 +1,6 @@
-from initial_pieces import initial_pieces
-from cell import normal_cells, special_cells, start_cells, end_cells
-from board_ui import board
+from setup.initial_pieces import initial_pieces
+from setup.cell import normal_cells, special_cells, start_cells, end_cells
+from setup.board_ui import board
 
 class Board:
     initial_pieces = initial_pieces
