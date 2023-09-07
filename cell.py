@@ -1,5 +1,4 @@
 normal_cells = {
-    (1,6): "right",
     (2,6): "right",
     (3,6): "right",
     (4,6): "right",
@@ -56,7 +55,7 @@ normal_cells = {
 
 special_cells = {
     "red": {
-        (0,7): "right",
+        (1,6): "down",
         (1,7): "right",
         (2,7): "right",
         (3,7): "right",
@@ -64,7 +63,7 @@ special_cells = {
         (5,7): "right",
     },
     "green": {
-        (7,0): "down", #green
+        (8,1): "left",
         (7,1): "down",
         (7,2): "down",
         (7,3): "down",
@@ -72,7 +71,7 @@ special_cells = {
         (7,5): "down",
     },
     "yellow": {
-        (14,7): "left",
+        (13,8): "up",
         (13,7): "left",
         (12,7): "left",
         (11,7): "left",
@@ -80,7 +79,7 @@ special_cells = {
         (9,7): "left",
     },
     "blue": {
-        (7,14): "up",
+        (6,13): "right",
         (7,13): "up",
         (7,12): "up",
         (7,11): "up",
@@ -90,10 +89,10 @@ special_cells = {
 }
 
 start_cells = {
-    "red": (1,6),
-    "green": (8,1),
-    "yellow": (13,8),
-    "blue": (6,13)
+    "red": (2,6),
+    "green": (8,2),
+    "yellow": (12,8),
+    "blue": (6,12)
 }
 
 end_cells = {

@@ -15,7 +15,7 @@ def ask_number_of_players():
 if __name__ == "__main__":
     # Techine for the game, which piece to move next
     type_of_plays = ["last", "first", "random"]
-    type_of_play = type_of_plays[2]
+    type_of_play = type_of_plays[1]
 
     number_of_players = ask_number_of_players()
 
