@@ -54,22 +54,38 @@ class Game:
     def show_board(self):
         print(self.board.board)
 
-    def get_order_player(self):
-        rolls = list(
-            map(lambda player: (player, self.dice.roll()), self.players))
+    def get_order_player(self) -> list[Player]:
+        """El jugador con el dado mas grande comienza el juego, si hay empate,
+        los jugadores con empate tiran de nuevo. El juego va desde el que
+        empieza y luego sentido del reloj"""
+        tied_players = self.players
 
         while True:
-            rolls.sort(key=lambda x: x[1], reverse=True)
+            player_rolls = list(
+                map(lambda player: (player, self.dice.roll()), tied_players))
 
-            highest_roll = rolls[0][1]
-            tied_players = [roll for roll in rolls if roll[1] == highest_roll]
+            for player_roll in player_rolls:
+                player: Player = player_roll[0]
+                roll: int = player_roll[1]
+                print(f"Jugador {player} lanzo {roll}")
+                sleep(1)
+            sleep(2)
+            clear()
+
+            player_rolls.sort(key=lambda x: x[1], reverse=True)
+
+            highest_roll = player_rolls[0][1]
+            tied_players = [player_roll[0]
+                            for player_roll in player_rolls if player_roll[1] == highest_roll]
 
             if len(tied_players) == 1:
-                return [roll[0] for roll in rolls]
-
-            for index, (player, roll) in enumerate(rolls):
-                if roll == highest_roll:
-                    rolls[index] = (player, self.dice.roll())
+                player_index = self.players.index(tied_players[0])
+                order = self.players[player_index:]+self.players[:player_index]
+                print(
+                    f"Gano {order[0]}, el orden es {[str(p) for p in order]}")
+                sleep(3)
+                clear()
+                return order
 
     def start(self):
         order_players = self.get_order_player()
