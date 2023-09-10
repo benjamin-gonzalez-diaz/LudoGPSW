@@ -2,11 +2,15 @@ from dice import Dice
 from board import Board
 from player import Player
 from time import sleep
+from piece import Piece
 
 import os
 
 
 def clear():
+    """
+    Limpia el terminal
+    """
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
@@ -25,6 +29,9 @@ class Game:
         self.initilize_players()
 
     def __get_player_colors(self, number_players) -> list[str]:
+        """
+        Retorna una lista de los colores (Jugadores) que van a jugar
+        """
         colors = ["red", "green", "yellow", "blue"]
         try:
             number_players = int(number_players)
@@ -35,15 +42,20 @@ class Game:
         except ValueError:
             raise ValueError("Valor incorrecto, ingrese un numero entre 2 y 4")
 
-    def initilize_players(self):
+    def initilize_players(self) -> None:
+        """
+        Rellena self.players con los jugadores y su color
+        """
         for color in self.colors:
             player = Player(color)
             player.initialize_pieces(Board.initial_pieces)
             self.players.append(player)
             self.players_dict[color] = player
 
-    def update_board(self):
-        # clear()
+    def update_board(self) -> None:
+        """
+        Actualiza el tablero con las fichas de los jugadores
+        """
         tokens = []
         for player in self.players:
             for piece in player.pieces:
@@ -51,13 +63,12 @@ class Game:
 
         self.board.fill_board(tokens)
 
-    def show_board(self):
-        print(self.board.board)
-
     def get_order_player(self) -> list[Player]:
-        """El jugador con el dado mas grande comienza el juego, si hay empate,
+        """
+        El jugador con el dado mas grande comienza el juego, si hay empate,
         los jugadores con empate tiran de nuevo. El juego va desde el que
-        empieza y luego sentido del reloj"""
+        empieza y luego sentido del reloj
+        """
         tied_players = self.players
 
         while True:
@@ -87,7 +98,10 @@ class Game:
                 clear()
                 return order
 
-    def start(self):
+    def start(self) -> None:
+        """
+        Procedimiento del juego
+        """
         order_players = self.get_order_player()
         actual_player = order_players[0]
         self.show_next_frame()
@@ -166,22 +180,35 @@ class Game:
                 actual_player) + 1) % len(order_players)]
             # input("Presiona enter para continuar")
 
-    def show_next_frame(self):
+    def show_next_frame(self) -> None:
+        """
+        Imprime el tablero en el terminal
+        """
         clear()
         self.update_board()
-        self.show_board()
+        print(self.board)
         sleep(self.SPEED_FRAME)
-        # clear()
 
-    def check_pieces_same_position(self, player, piece):
-        return [
-            other_piece
-            for p in (p for p in self.players if p != player)
-            for other_piece in p.pieces
-            if other_piece.get_coord() == piece.get_coord()
-        ]
+    def check_pieces_same_position(self, player: Player, piece: Piece) -> list[Piece]:
+        """
+        Retorna una lista con las fichas que se encuentren en la posicion de la ficha
+        actual, y que no pertenescan al jugador.
+        """
+        pieces_same_pos: list[Piece] = []
 
-    def send_to_start(self, pieces):
+        other_players: list[Player] = [p for p in self.players if p != player]
+        for op in other_players:
+            op_pieces = op.pieces
+            for op_piece in op_pieces:
+                if op_piece.get_coord() == piece.get_coord():
+                    pieces_same_pos.append(op_piece)
+
+        return pieces_same_pos
+
+    def send_to_start(self, pieces) -> None:
+        """
+        Resetea una ficha a su estado inicial
+        """
         for piece in pieces:
             piece.move_to(*piece.initial_pos)
             self.show_next_frame()
