@@ -27,6 +27,7 @@ class Game:
         self.colors = self.__get_player_colors(number_players)
         self.dice = Dice()
         self.initilize_players()
+        self.turn = 0
 
     def __get_player_colors(self, number_players) -> list[str]:
         """
@@ -98,6 +99,35 @@ class Game:
                 clear()
                 return order
 
+    def increment_turn(self,) -> None:
+        """
+        Incrementa el turno actual del juego
+        """
+        self.turn+=1
+
+    def print_turn(self,) -> None:
+        """
+        Imprime en terminal el turno actual
+        """
+        print(f"""
+#======================== Turno =======================#
+#                        {str(self.turn) + (5-len(str(self.turn)))*" "}                         #
+#======================================================#
+        """)
+
+    def print_roll(self, dice: Dice, player: Player) -> None:
+        """
+        Imprime en terminal el dado y color de jugador
+        """
+        print(f"""
+Dado: {dice}
+Color jugador: {player.color}
+        """)
+
+    def wait_enter(self,) -> None:
+        """Espera que el jugador aprete enter"""
+        input("Presiona enter para continuar")
+
     def start(self) -> None:
         """
         Procedimiento del juego
@@ -107,25 +137,16 @@ class Game:
         self.show_next_frame()
         sleep(2)
 
-        General_turno = 0
         while True:
-            General_turno += 1
-            print("#======================== Turno =======================#")
-            print(
-                f"-------------------->  {General_turno}  <---------------------")
-            print("#======================================================#")
-
+            self.increment_turn()
+            self.print_turn()
             self.current_player = actual_player
             self.update_board()
             self.dice.roll()
             dice = self.dice
-            print("dado: ", dice)
-            print("color jugador: ", actual_player.color)
-            # self.dice.value = 6
-            # piece = actual_player.next_piece_last()
+            self.print_roll(dice, actual_player)
             piece = actual_player.next_piece_first()
-            # piece = actual_player.next_piece_random()
-            input("Presiona enter para continuar")
+            self.wait_enter()
             if piece.first_move:
                 initial_pos_coord = Board.start_cells[self.current_player.color]
                 x_coord, y_coord = initial_pos_coord
@@ -170,10 +191,7 @@ class Game:
 
             if actual_player.has_won():
                 self.winner = actual_player
-                print("#======================== Turno =======================#")
-                print(
-                    f"-------------------->  {General_turno}  <---------------------")
-                print("#======================================================#")
+                self.print_turn()
                 print(f"El ganador es {self.winner.color}")
                 break
             actual_player = order_players[(order_players.index(
