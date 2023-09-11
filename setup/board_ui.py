@@ -15,3 +15,13 @@ board = """
 🟦⬜⬜⬜⬜🟦🟦🟦⬜🟨⬜⬜⬜⬜🟨
 🟦🟦🟦🟦🟦🟦⬜⬜⬜🟨🟨🟨🟨🟨🟨
 """
+
+
+matrix = [list(row) for row in board.strip().split('\n')]
+
+def show_board(matrix):
+    for row in matrix:
+        row = "".join(row)
+        print(row)
+
+show_board(matrix)

@@ -1,9 +1,10 @@
 from components.dice import Dice
 from components.board import Board
 from components.player import Player
+from util.resource_path import resource_path
 
 from util.clear_console import clear
-from util.logger import Logger
+# from util.logger import Logger
 
 from time import sleep
 
@@ -21,8 +22,8 @@ class Game:
         self.dice = Dice()
         self.board = Board()
 
-        self.logger = Logger("log.txt")
-        self.logger.clear()
+        # self.logger = Logger("log.txt")
+        # self.logger.clear()
 
         self.speed_frame = speed_frame
 
@@ -45,7 +46,7 @@ class Game:
         self.board.fill_board(tokens)
 
     def show_board(self):
-        print(self.board.board)
+        self.board.show_board()
 
     def get_order_player(self):
         rolls = list(map(lambda player: (player, self.dice.roll()), self.players))
@@ -111,7 +112,7 @@ class Game:
                         piece.finished = True
                         for p in piece.rest_of_kinged_pieces:
                             p.finished = True
-                        self.logger.log(f"La pieza {piece} ha terminado y las piezas {piece.rest_of_kinged_pieces} tambien")
+                        # self.logger.log(f"La pieza {piece} ha terminado y las piezas {piece.rest_of_kinged_pieces} tambien")
                         break
 
                     elif piece.get_coord() in Board.initial_pieces[current_player.color]["positions"]:
@@ -144,10 +145,11 @@ class Game:
                 self.show_next_frame()
         
             if current_player.has_won():
-                pygame.mixer.music.load(f"sounds/win.mp3")
+                pygame.mixer.music.load(resource_path(f"sounds/win.mp3"))
                 pygame.mixer.music.play()
                 print(f"El ganador es {current_player}")
                 sleep(4)
+                input("Presiona una tecla para salir...")
                 break
 
             if not self.dice.can_repeat():
@@ -176,7 +178,7 @@ class Game:
             player.kinged_pieces.append(combined_group)
         
     def send_to_start(self, piece):
-        self.logger.log(f"La pieza {piece} fue enviada al inicio")
+        # self.logger.log(f"La pieza {piece} fue enviada al inicio")
         piece.move_to(*piece.initial_pos)
         piece.first_move = True
         piece.number_of_moves = 0
