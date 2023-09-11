@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -160,3 +161,6 @@ cython_debug/
 #.idea/
 
 log.txt
+=======
+__pycache__
+>>>>>>> 83aa27e1e6898c54e70135d03c6b7b9648bfb596
