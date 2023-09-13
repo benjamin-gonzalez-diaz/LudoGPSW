@@ -8,9 +8,9 @@ from util.clear_console import clear
 
 from time import sleep
 
-import pygame.mixer
+#import pygame.mixer
 
-pygame.mixer.init()
+#pygame.mixer.init()
 
 class Game:
 
@@ -145,8 +145,8 @@ class Game:
                 self.show_next_frame()
         
             if current_player.has_won():
-                pygame.mixer.music.load(resource_path(f"sounds/win.mp3"))
-                pygame.mixer.music.play()
+                #pygame.mixer.music.load(resource_path(f"sounds/win.mp3"))
+                #pygame.mixer.music.play()
                 print(f"El ganador es {current_player}")
                 sleep(4)
                 input("Presiona una tecla para salir...")

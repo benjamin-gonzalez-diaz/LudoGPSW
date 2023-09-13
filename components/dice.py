@@ -1,4 +1,4 @@
-from numpy import random
+import random
 
 class Dice:
 
