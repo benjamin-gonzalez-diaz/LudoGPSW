@@ -145,7 +145,7 @@ Color jugador: {player.color}
             self.dice.roll()
             dice = self.dice
             self.print_roll(dice, actual_player)
-            piece = actual_player.next_piece_first()
+            piece = actual_player.next_piece()
             self.wait_enter()
             if piece.first_move:
                 initial_pos_coord = Board.start_cells[self.current_player.color]

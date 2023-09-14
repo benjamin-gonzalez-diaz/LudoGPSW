@@ -27,26 +27,24 @@ class Player:
                 return False
         return True
 
-    def next_piece_last(self):
+    def next_piece(self, method: int = 0) -> Piece:
+        """
+        Retorna la siguiente ficha ha jugar, se le puede pasar el metodo a
+        ocupar.
+        0: la pieza con mayor numero de movimientos
+        1: la pieza con menor numero de movimientos
+        2: al azar
+        """
         unfinished_pieces = [
             piece for piece in self.pieces if not piece.finished]
         if not unfinished_pieces:
             return None
-        return min(unfinished_pieces, key=lambda piece: piece.number_of_moves)
-
-    def next_piece_first(self):
-        unfinished_pieces = [
-            piece for piece in self.pieces if not piece.finished]
-        if not unfinished_pieces:
-            return None
-        return max(unfinished_pieces, key=lambda piece: piece.number_of_moves)
-
-    def next_piece_random(self):
-        unfinished_pieces = [
-            piece for piece in self.pieces if not piece.finished]
-        if not unfinished_pieces:
-            return None
-        return choice(unfinished_pieces)
+        elif method == 0:
+            return max(unfinished_pieces, key=lambda piece: piece.number_of_moves)
+        elif method == 1:
+            return min(unfinished_pieces, key=lambda piece: piece.number_of_moves)
+        elif method == 2:
+            return choice(unfinished_pieces)
 
     def __str__(self):
         return self.color
