@@ -138,6 +138,13 @@ Color jugador: {player.color}
         sleep(2)
 
         while True:
+
+            if actual_player.has_won():
+                self.winner = actual_player
+                self.print_turn()
+                print(f"El ganador es {self.winner.color}")
+                break
+
             self.increment_turn()
             self.print_turn()
             self.current_player = actual_player
